@@ -1,2 +1,3 @@
-# iot-data-streaming
-IoT Data Streaming
+# IoT Streams
+
+IoT Streams
