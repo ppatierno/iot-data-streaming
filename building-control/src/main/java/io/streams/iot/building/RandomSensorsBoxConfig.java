@@ -27,8 +27,9 @@ public class RandomSensorsBoxConfig extends SensorsBoxConfig {
     public RandomSensorsBoxConfig(int samplingInterval,
                                   int temperatureMin, int temperatureMax,
                                   int humidityMin, int humidityMax,
-                                  int pirMaxInterval) {
-        super(samplingInterval);
+                                  int pirMaxInterval,
+                                  String transportClass) {
+        super(samplingInterval, transportClass);
         this.temperatureMin = temperatureMin;
         this.temperatureMax = temperatureMax;
         this.humidityMin = humidityMin;
@@ -56,6 +57,12 @@ public class RandomSensorsBoxConfig extends SensorsBoxConfig {
         return pirMaxInterval;
     }
 
+    /**
+     * Loads configuration parameters from a related map
+     *
+     * @param map map from which loading configuration parameters
+     * @return sensors box configuration instance
+     */
     public static RandomSensorsBoxConfig fromMap(Map<String, String> map) {
 
         int samplingInterval = SensorsBoxConfig.DEFAULT_SAMPLING_INTERVAL;
@@ -94,10 +101,12 @@ public class RandomSensorsBoxConfig extends SensorsBoxConfig {
             pirMaxInterval = Integer.valueOf(pirMaxIntervalEnvVar);
         }
 
+        String transportClass = map.getOrDefault(SensorsBoxConfig.SENSORSBOX_TRANSPORT_CLASS, SensorsBoxConfig.DEFAULT_TRANSPORT_CLASS);
+
         return new RandomSensorsBoxConfig(samplingInterval,
                 temperatureMin, temperatureMax,
                 humidityMin, humidityMax,
-                pirMaxInterval);
+                pirMaxInterval, transportClass);
     }
 
     @Override

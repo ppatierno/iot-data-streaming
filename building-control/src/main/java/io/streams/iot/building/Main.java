@@ -57,6 +57,7 @@ public class Main {
 
         Properties sensorsProps = new Properties();
         sensorsProps.setProperty(SensorsBox.SAMPLING_INTERVAL, String.valueOf(sensorsBoxConfig.samplingInterval()));
+        sensorsProps.setProperty(SensorsBox.TRANSPORT_CLASS, sensorsBoxConfig.transportClass());
         sensorsBox.init(sensorsProps);
 
         vertx.deployVerticle(sensorsBox, result -> {

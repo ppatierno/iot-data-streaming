@@ -8,6 +8,8 @@ import io.streams.iot.devices.Device;
 import io.streams.iot.sensors.HumiditySensor;
 import io.streams.iot.sensors.PirSensor;
 import io.streams.iot.sensors.TemperatureSensor;
+import io.streams.iot.transport.Client;
+import io.streams.iot.transport.KafkaClient;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -15,6 +17,7 @@ import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 /**
@@ -25,12 +28,15 @@ public class SensorsBox extends AbstractVerticle implements Device {
     private static final Logger log = LogManager.getLogger(SensorsBox.class);
 
     public static final String SAMPLING_INTERVAL = "sampling-interval";
+    public static final String TRANSPORT_CLASS = "transport-class";
 
     private Vertx vertx;
     private String deviceId;
     private TemperatureSensor temperatureSensor;
     private HumiditySensor humiditySensor;
     private PirSensor pirSensor;
+
+    private Client client;
 
     private int samplingInterval = SensorsBoxConfig.DEFAULT_SAMPLING_INTERVAL;
 
@@ -66,6 +72,18 @@ public class SensorsBox extends AbstractVerticle implements Device {
         if (config != null) {
             samplingInterval = config.getProperty(SAMPLING_INTERVAL) != null ?
                     Integer.valueOf(config.getProperty(SAMPLING_INTERVAL)) : SensorsBoxConfig.DEFAULT_SAMPLING_INTERVAL;
+
+            try {
+                String transportClass = config.getProperty(TRANSPORT_CLASS) != null ?
+                        config.getProperty(TRANSPORT_CLASS) : SensorsBoxConfig.DEFAULT_TRANSPORT_CLASS;
+                Class transport = Class.forName(transportClass);
+                Constructor constructor = transport.getConstructor(Vertx.class);
+                client = (Client) constructor.newInstance(vertx);
+            } catch (Exception e) {
+                log.error("Transport class instantiation error ...", e);
+                this.client = new KafkaClient(vertx);
+                log.info("Using default {} as transport", KafkaClient.class);
+            }
         }
 
         if (pirSensor != null) {
