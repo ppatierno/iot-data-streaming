@@ -13,8 +13,8 @@ import java.util.Properties;
  */
 public class RandomTemperatureSensor extends RandomValueSensor<Integer> implements TemperatureSensor {
 
-    private static final int DEFAULT_CONFIG_MIN = 20;
-    private static final int DEFAULT_CONFIG_MAX = 22;
+    public static final int DEFAULT_CONFIG_MIN = 20;
+    public static final int DEFAULT_CONFIG_MAX = 22;
 
     @Override
     public void init(Properties config) {

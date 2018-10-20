@@ -24,7 +24,7 @@ public class SensorsBox extends AbstractVerticle implements Device {
 
     private static final Logger log = LogManager.getLogger(SensorsBox.class);
 
-    private static final int DEFAULT_SAMPLING_INTERVAL = 1000; // ms
+    public static final String SAMPLING_INTERVAL = "sampling-interval";
 
     private Vertx vertx;
     private String deviceId;
@@ -32,7 +32,7 @@ public class SensorsBox extends AbstractVerticle implements Device {
     private HumiditySensor humiditySensor;
     private PirSensor pirSensor;
 
-    private int samplingInterval = DEFAULT_SAMPLING_INTERVAL;
+    private int samplingInterval = SensorsBoxConfig.DEFAULT_SAMPLING_INTERVAL;
 
     public String deviceId() {
         return deviceId;
@@ -62,7 +62,11 @@ public class SensorsBox extends AbstractVerticle implements Device {
 
     @Override
     public void init(Properties config) {
-        // TODO
+
+        if (config != null) {
+            samplingInterval = config.getProperty(SAMPLING_INTERVAL) != null ?
+                    Integer.valueOf(config.getProperty(SAMPLING_INTERVAL)) : SensorsBoxConfig.DEFAULT_SAMPLING_INTERVAL;
+        }
 
         if (pirSensor != null) {
             pirSensor.motionDetectedHandler(v -> {

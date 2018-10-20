@@ -10,10 +10,12 @@ import io.streams.iot.sensors.TemperatureSensor;
 import io.streams.iot.sensors.impl.RandomHumiditySensor;
 import io.streams.iot.sensors.impl.RandomPirSensor;
 import io.streams.iot.sensors.impl.RandomTemperatureSensor;
+import io.streams.iot.sensors.impl.RandomValueSensor;
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Properties;
 import java.util.UUID;
 
 public class Main {
@@ -21,22 +23,31 @@ public class Main {
     private static final Logger log = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        SensorsBoxConfig sensorsBoxConfig = SensorsBoxConfig.fromMap(System.getenv());
+        RandomSensorsBoxConfig sensorsBoxConfig = RandomSensorsBoxConfig.fromMap(System.getenv());
         Vertx vertx = Vertx.vertx();
         Main.run(vertx, sensorsBoxConfig);
     }
 
-    private static void run(Vertx vertx, SensorsBoxConfig sensorsBoxConfig) {
+    private static void run(Vertx vertx, RandomSensorsBoxConfig sensorsBoxConfig) {
 
-        // TODO: get sensors configuration from sensorsBoxConfig
+        log.info(sensorsBoxConfig);
+
         TemperatureSensor temperatureSensor = new RandomTemperatureSensor();
-        temperatureSensor.init(null);
+        Properties temperatureProps = new Properties();
+        temperatureProps.setProperty(RandomValueSensor.CONFIG_MIN, String.valueOf(sensorsBoxConfig.temperatureMin()));
+        temperatureProps.setProperty(RandomValueSensor.CONFIG_MAX, String.valueOf(sensorsBoxConfig.temperatureMax()));
+        temperatureSensor.init(temperatureProps);
 
         HumiditySensor humiditySensor = new RandomHumiditySensor();
-        humiditySensor.init(null);
+        Properties humidityProps = new Properties();
+        humidityProps.setProperty(RandomValueSensor.CONFIG_MIN, String.valueOf(sensorsBoxConfig.humidityMin()));
+        humidityProps.setProperty(RandomValueSensor.CONFIG_MAX, String.valueOf(sensorsBoxConfig.humidityMax()));
+        humiditySensor.init(humidityProps);
 
         PirSensor pirSensor = new RandomPirSensor(vertx);
-        pirSensor.init(null);
+        Properties pirProps = new Properties();
+        pirProps.setProperty(RandomPirSensor.CONFIG_MAX_INTERVAL, String.valueOf(sensorsBoxConfig.pirMaxInterval()));
+        pirSensor.init(pirProps);
 
         SensorsBox sensorsBox = new SensorsBox.Builder(vertx, UUID.randomUUID().toString())
                 .withTemperatureSensor(temperatureSensor)
@@ -44,8 +55,9 @@ public class Main {
                 .withPirSensor(pirSensor)
                 .build();
 
-        // TODO: get sensors box configuration from sensorsBoxConfig
-        sensorsBox.init(null);
+        Properties sensorsProps = new Properties();
+        sensorsProps.setProperty(SensorsBox.SAMPLING_INTERVAL, String.valueOf(sensorsBoxConfig.samplingInterval()));
+        sensorsBox.init(sensorsProps);
 
         vertx.deployVerticle(sensorsBox, result -> {
             if (result.succeeded()) {

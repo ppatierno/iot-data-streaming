@@ -4,15 +4,26 @@
  */
 package io.streams.iot.building;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.Map;
 
 /**
  * Sensors box configuration
  */
-public class SensorsBoxConfig {
+public abstract class SensorsBoxConfig {
 
-    public static SensorsBoxConfig fromMap(Map<String, String> map) {
-        // TODO
-        return new SensorsBoxConfig();
+    public static final String SENSORSBOX_SAMPLING_INTERVAL = "SENSORSBOX_SAMPLING_INTERVAL";
+
+    public static final int DEFAULT_SAMPLING_INTERVAL = 1000; // ms
+
+    protected final int samplingInterval;
+
+    public SensorsBoxConfig(int samplingInterval) {
+        this.samplingInterval = samplingInterval;
+    }
+
+    public int samplingInterval() {
+        return samplingInterval;
     }
 }

@@ -13,8 +13,8 @@ import java.util.Properties;
  */
 public class RandomHumiditySensor extends RandomValueSensor<Integer> implements HumiditySensor {
 
-    private static final int DEFAULT_CONFIG_MIN = 50;
-    private static final int DEFAULT_CONFIG_MAX = 55;
+    public static final int DEFAULT_CONFIG_MIN = 50;
+    public static final int DEFAULT_CONFIG_MAX = 55;
 
     @Override
     public void init(Properties config) {

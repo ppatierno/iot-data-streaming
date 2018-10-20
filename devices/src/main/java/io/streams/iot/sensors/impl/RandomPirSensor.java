@@ -18,7 +18,7 @@ public class RandomPirSensor implements PirSensor {
 
     public static final String CONFIG_MAX_INTERVAL = "max-interval";
 
-    private static final int DEFAULT_MAX_INTERVAL = 10000; // ms
+    public static final int DEFAULT_MAX_INTERVAL = 10000; // ms
 
     private Handler<Void> handler;
     private Vertx vertx;
