@@ -13,10 +13,20 @@ import java.util.Properties;
  */
 public class RandomTemperatureSensor extends RandomValueSensor<Integer> implements TemperatureSensor {
 
+    private static final int DEFAULT_CONFIG_MIN = 20;
+    private static final int DEFAULT_CONFIG_MAX = 22;
+
     @Override
     public void init(Properties config) {
-        init(Integer.valueOf(config.getProperty(CONFIG_MIN)),
-                Integer.valueOf(config.getProperty(CONFIG_MAX)));
+        int min = DEFAULT_CONFIG_MIN;
+        int max = DEFAULT_CONFIG_MAX;
+        if (config != null) {
+            min = config.getProperty(CONFIG_MIN) != null ?
+                    Integer.valueOf(config.getProperty(CONFIG_MIN)) : DEFAULT_CONFIG_MIN;
+            max = config.getProperty(CONFIG_MAX) != null ?
+                    Integer.valueOf(config.getProperty(CONFIG_MAX)) : DEFAULT_CONFIG_MAX;
+        }
+        init(min, max);
     }
 
     @Override

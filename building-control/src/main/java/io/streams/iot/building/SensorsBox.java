@@ -10,6 +10,10 @@ import io.streams.iot.sensors.PirSensor;
 import io.streams.iot.sensors.TemperatureSensor;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 
@@ -18,10 +22,17 @@ import java.util.Properties;
  */
 public class SensorsBox extends AbstractVerticle implements Device {
 
+    private static final Logger log = LogManager.getLogger(SensorsBox.class);
+
+    private static final int DEFAULT_SAMPLING_INTERVAL = 1000; // ms
+
+    private Vertx vertx;
     private String deviceId;
     private TemperatureSensor temperatureSensor;
     private HumiditySensor humiditySensor;
     private PirSensor pirSensor;
+
+    private int samplingInterval = DEFAULT_SAMPLING_INTERVAL;
 
     public String deviceId() {
         return deviceId;
@@ -52,16 +63,39 @@ public class SensorsBox extends AbstractVerticle implements Device {
     @Override
     public void init(Properties config) {
         // TODO
+
+        if (pirSensor != null) {
+            pirSensor.motionDetectedHandler(v -> {
+                log.info("Motion detected!!");
+            });
+        }
+
+        Handler<Long> samplingTimer = new Handler<Long>() {
+
+            @Override
+            public void handle(Long aLong) {
+
+                log.info("temperature = {}, humidity = {}",
+                        temperatureSensor.getTemperature(),
+                        humiditySensor.getHumidity());
+
+                vertx.setTimer(samplingInterval, this);
+            }
+        };
+
+        vertx.setTimer(samplingInterval, samplingTimer);
     }
 
     public static class Builder {
 
+        private Vertx vertx;
         private String deviceId;
         private TemperatureSensor temperatureSensor;
         private HumiditySensor humiditySensor;
         private PirSensor pirSensor;
 
-        public Builder(String deviceId) {
+        public Builder(Vertx vertx, String deviceId) {
+            this.vertx = vertx;
             this.deviceId = deviceId;
         }
 
@@ -82,6 +116,7 @@ public class SensorsBox extends AbstractVerticle implements Device {
 
         public SensorsBox build() {
             SensorsBox sensorsBox = new SensorsBox();
+            sensorsBox.vertx = vertx;
             sensorsBox.deviceId = deviceId;
             sensorsBox.temperatureSensor = temperatureSensor;
             sensorsBox.humiditySensor = humiditySensor;

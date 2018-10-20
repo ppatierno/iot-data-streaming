@@ -11,8 +11,14 @@ import io.streams.iot.sensors.impl.RandomHumiditySensor;
 import io.streams.iot.sensors.impl.RandomPirSensor;
 import io.streams.iot.sensors.impl.RandomTemperatureSensor;
 import io.vertx.core.Vertx;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.UUID;
 
 public class Main {
+
+    private static final Logger log = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
         SensorsBoxConfig sensorsBoxConfig = SensorsBoxConfig.fromMap(System.getenv());
@@ -32,7 +38,7 @@ public class Main {
         PirSensor pirSensor = new RandomPirSensor(vertx);
         pirSensor.init(null);
 
-        SensorsBox sensorsBox = new SensorsBox.Builder("device-id")
+        SensorsBox sensorsBox = new SensorsBox.Builder(vertx, UUID.randomUUID().toString())
                 .withTemperatureSensor(temperatureSensor)
                 .withHumiditySensor(humiditySensor)
                 .withPirSensor(pirSensor)
@@ -43,8 +49,9 @@ public class Main {
 
         vertx.deployVerticle(sensorsBox, result -> {
             if (result.succeeded()) {
-                // TODO: just logging?
+                log.info("SensorsBox {} verticle started", sensorsBox.deviceId());
             } else {
+                log.error("SensorsBox failed to start", result.cause());
                 System.exit(1);
             }
         });

@@ -18,6 +18,8 @@ public class RandomPirSensor implements PirSensor {
 
     public static final String CONFIG_MAX_INTERVAL = "max-interval";
 
+    private static final int DEFAULT_MAX_INTERVAL = 10000; // ms
+
     private Handler<Void> handler;
     private Vertx vertx;
     private int maxInterval;
@@ -35,13 +37,19 @@ public class RandomPirSensor implements PirSensor {
 
     @Override
     public void init(Properties config) {
-        maxInterval = Integer.valueOf(config.getProperty(CONFIG_MAX_INTERVAL));
+        maxInterval = DEFAULT_MAX_INTERVAL;
+        if (config != null) {
+            maxInterval = config.getProperty(CONFIG_MAX_INTERVAL) != null ?
+                    Integer.valueOf(config.getProperty(CONFIG_MAX_INTERVAL)) : DEFAULT_MAX_INTERVAL;
+        }
 
         Handler<Long> timer = new Handler<Long>() {
 
             @Override
             public void handle(Long aLong) {
-                handler.handle(null);
+                if (handler != null) {
+                    handler.handle(null);
+                }
                 int interval = random.nextInt(maxInterval);
                 vertx.setTimer(interval, this);
             }
